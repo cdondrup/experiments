@@ -63,6 +63,9 @@ class Test(object):
         self.goal_pose.pose.position.x = conf["point"]["x"]
         self.goal_pose.pose.position.y = conf["point"]["y"]
 
+        self.pub = rospy.Publisher("/move_base/current_goal", PoseStamped, queue_size=1, latch=True)
+        self.pub.publish(self.goal_pose)
+
         self.num_trial = 0
         self.scenario = "record_robot"
 
