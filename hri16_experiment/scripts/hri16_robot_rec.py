@@ -19,6 +19,11 @@ from std_srvs.srv import Empty, EmptyResponse
 from test_cases.srv import Load, LoadRequest
 from fake_camera_effects.msg import CameraEffectsAction, CameraEffectsGoal
 from actionlib import SimpleActionClient
+import yaml
+from roslib.packages import find_resource
+
+
+PKG = "hri16_experiment"
 
 
 class Test(object):
@@ -43,15 +48,20 @@ class Test(object):
         self.crea_dyn = DynClient("online_qtc_creator")
         self.crea_dyn.update_configuration(self.__config_lookup[0])
 
+        with open(find_resource(PKG, 'fake_goals.yaml')[0],'r') as f:
+            conf = yaml.load(f)
+
         self.ppl_topic = rospy.get_param("~ppl_topic", "/people_tracker/positions")
         self.robot_topic = rospy.get_param("~robot_topic", "/robot_pose")
         self.qtc_topic = rospy.get_param("~qtc_topic", "/online_qtc_creator/qtc_array")
-        self.goal_topic = rospy.get_param("~goal_topic", "/goal_pose_republisher/pose")
+#        self.goal_topic = rospy.get_param("~goal_topic", "/goal_pose_republisher/pose")
 
         rospy.Service("~save", Empty, self.write_file)
 
         self.robot_pose = None
         self.goal_pose = PoseStamped()
+        self.goal_pose.pose.position.x = conf["point"]["x"]
+        self.goal_pose.pose.position.x = conf["point"]["y"]
 
         self.num_trial = 0
         self.scenario = "record_robot"
@@ -101,8 +111,8 @@ class Test(object):
     def pose_callback(self, msg):
         self.robot_pose = msg
 
-    def goal_callback(self, msg):
-        self.goal_pose = msg
+#    def goal_callback(self, msg):
+#        self.goal_pose = msg
 
     def get_new_states(self, key, qtc, buf):
         try:
@@ -158,26 +168,28 @@ class Test(object):
                     callback=self.qtc_callback,
                     queue_size=10
                 )
-                gs = rospy.Subscriber(
-                    self.goal_topic,
-                    PoseStamped,
-                    callback=self.goal_callback,
-                    queue_size=1
-                )
+#                gs = rospy.Subscriber(
+#                    self.goal_topic,
+#                    PoseStamped,
+#                    callback=self.goal_callback,
+#                    queue_size=1
+#                )
 
                 self.client.send_goal(CameraEffectsGoal())
 
             except (rospy.ServiceException, rospy.ROSInterruptException) as e:
                 rospy.logfatal(e)
             finally:
-                rospy.loginfo("Unsubscribing")
-                ps.unregister()
-                rs.unregister()
-                qs.unregister()
-                gs.unregister()
-                ps = None; rs = None; qs = None; gs = None
+                pass
 
         elif msg.B:
+            rospy.loginfo("Unsubscribing")
+            ps.unregister()
+            rs.unregister()
+            qs.unregister()
+#            gs.unregister()
+            ps = None; rs = None; qs = None; #gs = None
+
             try:
                 r = rospy.ServiceProxy("/scenario_server/reset", Empty)
                 rospy.loginfo("  ... waiting for %s" % r.resolved_name)
