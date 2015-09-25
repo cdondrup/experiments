@@ -21,6 +21,7 @@ from fake_camera_effects.msg import CameraEffectsAction, CameraEffectsGoal
 from actionlib import SimpleActionClient
 import yaml
 from roslib.packages import find_resource
+from collections import OrderedDict
 
 
 PKG = "hri16_experiment"
@@ -35,7 +36,7 @@ class Test(object):
         {"distance_threshold": 4.0}
     ]
 
-    __qtc_buffer = {}
+    __qtc_buffer = OrderedDict()
 
 
     def __init__(self, name):
