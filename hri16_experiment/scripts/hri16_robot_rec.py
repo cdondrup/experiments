@@ -184,10 +184,13 @@ class Test(object):
 
         elif msg.B:
             rospy.loginfo("Unsubscribing")
-            ps.unregister()
-            rs.unregister()
-            qs.unregister()
-#            gs.unregister()
+            try:
+                ps.unregister()
+                rs.unregister()
+                qs.unregister()
+    #            gs.unregister()
+            except UnboundLocalError as e:
+                rospy.logwarn(e)
             ps = None; rs = None; qs = None; #gs = None
 
             try:
