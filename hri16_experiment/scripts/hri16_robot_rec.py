@@ -35,14 +35,13 @@ class Test(object):
 
     def __init__(self, name):
         rospy.loginfo("Starting %s ..." % name)
-        self.interaction_type = rospy.get_param("~interaction_type")
         self.out_dir = rospy.get_param("~out_dir")
 
         self.client = SimpleActionClient("/camera_effects", CameraEffectsAction)
         self.client.wait_for_server()
 
         self.crea_dyn = DynClient("online_qtc_creator")
-        self.crea_dyn.update_configuration(self.__config_lookup[self.interaction_type["type"]])
+        self.crea_dyn.update_configuration(self.__config_lookup[0])
 
         self.ppl_topic = rospy.get_param("~ppl_topic", "/people_tracker/positions")
         self.robot_topic = rospy.get_param("~robot_topic", "/robot_pose")

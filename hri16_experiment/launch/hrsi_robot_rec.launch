@@ -1,10 +1,8 @@
 <launch>
 
+  <include file="$(find fake_camera_effects)/launch/camera_effect.launch"/>
+
   <node name="qsr_lib" pkg="qsr_lib" type="qsrlib_ros_server.py" output="screen" respawn="true"/>
-  <node name="goal_pose_republisher" pkg="hrsi_representation" type="goal_pose_republisher.py" output="screen" respawn="true"/>
-  <node name="people_tracker" pkg="people_tracker_emulator" type="posestamped_to_ppl_tracker_msgs.py" output="screen" respawn="true">
-    <param name="people" type="string" value="/people"/>
-  </node>
   <node pkg="hrsi_representation" type="online_qtc_creator.py" name="online_qtc_creator" output="screen" respawn="true">
     <param name="ppl_topic" type="string" value="/people_tracker/positions"/>
     <param name="processing_rate" type="int" value="60"/>
@@ -18,7 +16,6 @@
     <param name="prune_buffer" type="bool" value="false"/>
     <param name="validate" type="bool" value="true"/>
   </node>
-  <node pkg="hrsi_state_prediction" type="state_predictor.py" name="qtc_state_predictor" output="screen" respawn="true"/>
-  <node pkg="hrsi_velocity_costmaps" type="velocity_costmap_server.py" name="velocity_costmap_server" output="screen" respawn="true"/>
+  <node pkg="test_cases" type="scenario_server_robot.py" name="scenario_server" output="screen" respawn="true"/>
 
 </launch>
