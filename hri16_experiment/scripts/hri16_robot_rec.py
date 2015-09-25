@@ -61,7 +61,7 @@ class Test(object):
         self.robot_pose = None
         self.goal_pose = PoseStamped()
         self.goal_pose.pose.position.x = conf["point"]["x"]
-        self.goal_pose.pose.position.x = conf["point"]["y"]
+        self.goal_pose.pose.position.y = conf["point"]["y"]
 
         self.num_trial = 0
         self.scenario = "record_robot"
