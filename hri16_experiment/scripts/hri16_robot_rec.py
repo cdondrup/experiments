@@ -150,19 +150,19 @@ class Test(object):
             rospy.loginfo("Creating services ...")
             try:
                 rospy.loginfo("Subscribing to human and robot pose")
-                ps = rospy.Subscriber(
+                self.ps = rospy.Subscriber(
                     self.ppl_topic,
                     PeopleTracker,
                     callback=self.ppl_callback,
                     queue_size=1
                 )
-                rs = rospy.Subscriber(
+                self.rs = rospy.Subscriber(
                     self.robot_topic,
                     Pose,
                     callback=self.pose_callback,
                     queue_size=1
                 )
-                qs = rospy.Subscriber(
+                self.qs = rospy.Subscriber(
                     self.qtc_topic,
                     QTCArray,
                     callback=self.qtc_callback,
@@ -185,13 +185,13 @@ class Test(object):
         elif msg.B:
             rospy.loginfo("Unsubscribing")
             try:
-                ps.unregister()
-                rs.unregister()
-                qs.unregister()
+                self.ps.unregister()
+                self.rs.unregister()
+                self.qs.unregister()
     #            gs.unregister()
             except UnboundLocalError as e:
                 rospy.logwarn(e)
-            ps = None; rs = None; qs = None; #gs = None
+            self.ps = None; self.rs = None; self.qs = None; #gs = None
 
             try:
                 r = rospy.ServiceProxy("/scenario_server/reset", Empty)
