@@ -92,7 +92,7 @@ class Test(object):
         rospy.loginfo("... all done")
 
     def ppl_callback(self, msg):
-        if self.robot_pose == None:
+        if self.robot_pose == None or not msg.poses:
             return
         msgs = {
             "agent1": "robot",
