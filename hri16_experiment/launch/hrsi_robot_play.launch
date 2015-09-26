@@ -18,7 +18,7 @@
     <param name="no_collapse" type="bool" value="false"/>
     <param name="prune_buffer" type="bool" value="false"/>
     <param name="validate" type="bool" value="true"/>
-    <param name="goal_topic" type="string" value="/fake_goal"/>
+    <param name="goal_topic" type="string" value="/move_base/current_goal"/>
   </node>
   <node pkg="test_cases" type="scenario_server_robot.py" name="scenario_server" output="screen" respawn="true"/>
   <node pkg="hrsi_state_prediction" type="state_predictor.py" name="qtc_state_predictor" output="screen" respawn="true">
