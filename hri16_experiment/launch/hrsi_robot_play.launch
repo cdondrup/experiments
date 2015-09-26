@@ -21,7 +21,7 @@
   </node>
   <node pkg="test_cases" type="scenario_server_robot.py" name="scenario_server" output="screen" respawn="true"/>
   <node pkg="hrsi_state_prediction" type="state_predictor.py" name="qtc_state_predictor" output="screen" respawn="true">
-    <param name="model_dir" type="string" value="$(arg model_dir)"
+    <param name="model_dir" type="string" value="$(arg model_dir)"/>
   </node>
   <node pkg="hrsi_velocity_costmaps" type="velocity_costmap_server.py" name="velocity_costmap_server" output="screen" respawn="true"/>
 
