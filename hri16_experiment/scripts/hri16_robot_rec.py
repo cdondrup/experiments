@@ -231,6 +231,6 @@ class Test(object):
 
 
 if __name__ == "__main__":
-    rospy.init_node("test_icra16")
+    rospy.init_node("hri_record")
     t = Test(rospy.get_name())
     rospy.spin()
