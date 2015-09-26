@@ -227,7 +227,7 @@ class Test(object):
                 rospy.loginfo("Writing %s" % name)
                 np.savetxt(f, v, fmt='%.0f')
 
-        return EmptyResponse
+        return EmptyResponse()
 
 
 if __name__ == "__main__":

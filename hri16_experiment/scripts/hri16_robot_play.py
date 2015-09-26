@@ -172,6 +172,12 @@ class Test(object):
                     queue_size=1
                 )
 
+                s = rospy.ServiceProxy("/qtc_state_predictor/particle_filter/reset", Empty)
+                rospy.loginfo("  ... waiting for %s" % s.resolved_name)
+                s.wait_for_service()
+                rospy.loginfo("  ... calling %s" % s.resolved_name)
+                s()
+                rospy.loginfo("  ... done")
                 s = rospy.ServiceProxy("/scenario_server/start", Run)
                 rospy.loginfo("  ... waiting for %s" % s.resolved_name)
                 s.wait_for_service()
@@ -242,7 +248,7 @@ class Test(object):
                 rospy.loginfo("Writing %s" % name)
                 np.savetxt(f, v, fmt='%.0f')
 
-        return EmptyResponse
+        return EmptyResponse()
 
 
 if __name__ == "__main__":
