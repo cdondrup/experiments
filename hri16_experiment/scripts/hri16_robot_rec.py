@@ -225,15 +225,21 @@ class Test(object):
             name = "p"+self.par+"_"+str(i)+".csv"
             with open(mydir+"/"+name, 'w') as f:
                 rospy.loginfo("Writing %s" % name)
-                writer = csv.DictWriter(f, t[0].keys())
-                writer.writeheader()
-                writer.writerows(t)
+                try:
+                    writer = csv.DictWriter(f, t[0].keys())
+                    writer.writeheader()
+                    writer.writerows(t)
+                except Exception as e:
+                    rospy.logwarn(e)
 
         for i, v in enumerate(self.__qtc_buffer.values()):
             name = "p"+self.par+"_"+str(i)+"_qtc.txt"
             with open(mydir+"/"+name, 'w') as f:
                 rospy.loginfo("Writing %s" % name)
-                np.savetxt(f, v, fmt='%.0f')
+                try:
+                    np.savetxt(f, v, fmt='%.0f')
+                except Exception as e:
+                    rospy.logwarn(e)
 
         return EmptyResponse()
 
