@@ -23,6 +23,7 @@ import os
 from roslib.packages import find_resource
 from collections import OrderedDict
 import datetime
+from geometry_msgs.msg import Twist
 
 
 PKG = "hri16_experiment"
@@ -56,6 +57,8 @@ class Test(object):
         self.qtc_topic = rospy.get_param("~qtc_topic", "/online_qtc_creator/qtc_array")
         self.goal_topic = rospy.get_param("~goal_topic", "/goal_pose_republisher/pose")
 
+        self.pub = rospy.Publisher("/cmd_vel", Twist, queue_size=1)
+
         rospy.Service("~save", Empty, self.write_file)
 
         self.robot_pose = None
@@ -66,6 +69,7 @@ class Test(object):
 
         self.trajectories = []
         self.ret = []
+        self.stop_times = []
 
         rospy.loginfo("... loading scenario")
         try:
@@ -82,6 +86,13 @@ class Test(object):
             "/teleop_joystick/action_buttons",
             action_buttons,
             self.button_callback,
+            queue_size=1
+        )
+
+        rospy.Subscriber(
+            "/teleop_joystick/action_buttons",
+            action_buttons,
+            self.button_callback2,
             queue_size=1
         )
 
@@ -139,12 +150,22 @@ class Test(object):
                 qtc[-1][[1,3,0,2]]
             ).reshape(-1, 6)
 
+    def button_callback2(self, msg):
+        if msg.B:
+            self.stop_times[-1].append(rospy.Time.now().to_sec())
+            t = Twist()
+            t.linear.x = 0
+            t.angular.z = 0
+            self.pub.publish(t)
+            print self.stop_times[-1]
+
     def button_callback(self, msg):
         rospy.loginfo("Button pressed")
         if msg.A:
             rospy.loginfo("Starting run %s" % self.num_trial)
             self.num_trial += 1
             self.trajectories.append([])
+            self.stop_times.append([])
             rospy.loginfo("Creating services ...")
             try:
                 rospy.loginfo("Subscribing to human and robot pose")
@@ -193,6 +214,7 @@ class Test(object):
                 d["mean_speed"] = result.mean_speed
                 d["distance_travelled"] = result.distance_travelled
                 d["travel_time"] = result.travel_time
+                d["stop_time"] = self.stop_times[-1][-1] - self.stop_times[-1][0] if self.stop_times[-1] else 0.
                 self.ret.append(d)
                 self.write_file(None)
 
@@ -219,10 +241,6 @@ class Test(object):
                 except (rospy.ServiceException, rospy.ROSInterruptException) as e:
                     rospy.logfatal(e)
 
-        elif msg.B:
-
-
-            self.client.send_goal(CameraEffectsGoal())
 
     def write_file(self, req):
         stats = self.ret
