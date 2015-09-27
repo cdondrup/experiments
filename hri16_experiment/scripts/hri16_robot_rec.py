@@ -32,7 +32,7 @@ class Test(object):
     __no_state__ = 9.
 
     __config_lookup = [
-        {"distance_threshold": 6.0},
+        {"distance_threshold": 4.0},
         {"distance_threshold": 4.0},
         {"distance_threshold": 4.0}
     ]
@@ -43,7 +43,7 @@ class Test(object):
     def __init__(self, name):
         rospy.loginfo("Starting %s ..." % name)
         self.out_dir = rospy.get_param("~out_dir")
-        self.par = rospy.get_param("~par")
+        self.par = str(rospy.get_param("~par"))
 
         self.client = SimpleActionClient("/camera_effects", CameraEffectsAction)
         self.client.wait_for_server()
@@ -215,7 +215,10 @@ class Test(object):
         trajectories = self.trajectories
         rospy.loginfo("Writing results to %s" % self.out_dir)
         mydir = os.path.join(self.out_dir, "p"+self.par)
-        os.makedirs(mydir)
+        try:
+            os.makedirs(mydir)
+        except OSError as e:
+            rospy.logwarn(e)
 
         for i, t in enumerate(trajectories):
             name = "p"+self.par+"_"+str(i)+".csv"
