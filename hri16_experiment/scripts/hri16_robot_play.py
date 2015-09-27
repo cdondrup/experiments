@@ -33,7 +33,7 @@ class Test(object):
 
     __config_lookup = [
         {"distance_threshold": 6.0},
-        {"distance_threshold": 4.0},
+        {"distance_threshold": 6.0},
         {"distance_threshold": 4.0}
     ]
 
