@@ -209,6 +209,7 @@ class Test(object):
             except (rospy.ServiceException, rospy.ROSInterruptException) as e:
                 rospy.logfatal(e)
 
+            self.write_file(None)
             self.client.send_goal(CameraEffectsGoal())
 
     def write_file(self, req):

@@ -43,6 +43,7 @@ class Test(object):
     def __init__(self, name):
         rospy.loginfo("Starting %s ..." % name)
         self.out_dir = rospy.get_param("~out_dir")
+        self.par = str(rospy.get_param("~par"))
 
         self.client = SimpleActionClient("/camera_effects", CameraEffectsAction)
         self.client.wait_for_server()
@@ -193,6 +194,7 @@ class Test(object):
                 d["distance_travelled"] = result.distance_travelled
                 d["travel_time"] = result.travel_time
                 self.ret.append(d)
+                self.write_file(None)
 
             except (rospy.ServiceException, rospy.ROSInterruptException) as e:
                 rospy.logfatal(e)
@@ -226,8 +228,11 @@ class Test(object):
         stats = self.ret
         trajectories = self.trajectories
         rospy.loginfo("Writing results to %s" % self.out_dir)
-        mydir = os.path.join(self.out_dir, datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S'))
-        os.makedirs(mydir)
+        mydir = os.path.join(self.out_dir, "p"+self.par)
+        try:
+            os.makedirs(mydir)
+        except OSError as e:
+            rospy.logwarn(e)
         with open(mydir+"/stats.csv", 'w') as f:
             rospy.loginfo("Writing stats.csv")
             writer = csv.DictWriter(f, stats[0].keys())
@@ -235,7 +240,7 @@ class Test(object):
             writer.writerows(stats)
 
         for i, t in enumerate(trajectories):
-            name = str(i)+".csv"
+            name = "p"+self.par+"_"+str(i)+".csv"
             with open(mydir+"/"+name, 'w') as f:
                 rospy.loginfo("Writing %s" % name)
                 writer = csv.DictWriter(f, t[0].keys())
@@ -243,7 +248,7 @@ class Test(object):
                 writer.writerows(t)
 
         for i, v in enumerate(self.__qtc_buffer.values()):
-            name = str(i)+"_qtc.txt"
+            name = "p"+self.par+"_"+str(i)+"_qtc.txt"
             with open(mydir+"/"+name, 'w') as f:
                 rospy.loginfo("Writing %s" % name)
                 np.savetxt(f, v, fmt='%.0f')
