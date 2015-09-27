@@ -1,6 +1,11 @@
 <launch>
 
+  <arg name="ppl_map" default="/opt/strands/maps/WW_lab_15_09_25-ppl.yaml"/>
+
   <include file="$(find fake_camera_effects)/launch/camera_effect.launch"/>
+  <include file="$(find people_tracker_filter)/launch/filter.launch">
+    <arg name="map" value="$(arg ppl_map)"/>
+  </include>
 
   <node name="qsr_lib" pkg="qsr_lib" type="qsrlib_ros_server.py" output="screen" respawn="true"/>
   <node pkg="hrsi_representation" type="online_qtc_creator.py" name="online_qtc_creator" output="screen" respawn="true">
