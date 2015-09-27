@@ -22,6 +22,7 @@ from actionlib import SimpleActionClient
 import yaml
 from roslib.packages import find_resource
 from collections import OrderedDict
+import os
 
 
 PKG = "hri16_experiment"
@@ -42,6 +43,7 @@ class Test(object):
     def __init__(self, name):
         rospy.loginfo("Starting %s ..." % name)
         self.out_dir = rospy.get_param("~out_dir")
+        self.par = rospy.get_param("~par")
 
         self.client = SimpleActionClient("/camera_effects", CameraEffectsAction)
         self.client.wait_for_server()
@@ -212,18 +214,20 @@ class Test(object):
     def write_file(self, req):
         trajectories = self.trajectories
         rospy.loginfo("Writing results to %s" % self.out_dir)
+        mydir = os.path.join(self.out_dir, "p"+self.par)
+        os.makedirs(mydir)
 
         for i, t in enumerate(trajectories):
-            name = str(i)+".csv"
-            with open(self.out_dir+"/"+name, 'w') as f:
+            name = "p"+self.par+"_"+str(i)+".csv"
+            with open(mydir+"/"+name, 'w') as f:
                 rospy.loginfo("Writing %s" % name)
                 writer = csv.DictWriter(f, t[0].keys())
                 writer.writeheader()
                 writer.writerows(t)
 
         for i, v in enumerate(self.__qtc_buffer.values()):
-            name = str(i)+"_qtc.txt"
-            with open(self.out_dir+"/"+name, 'w') as f:
+            name = "p"+self.par+"_"+str(i)+"_qtc.txt"
+            with open(mydir+"/"+name, 'w') as f:
                 rospy.loginfo("Writing %s" % name)
                 np.savetxt(f, v, fmt='%.0f')
 
