@@ -61,11 +61,23 @@ class Test(object):
         "PluginPlannerROS/Obstacle/scale": 0.01
     }
 
+    __gaussian_config = {
+        "PluginPlannerROS/VelocityCostmaps/scale": 0.0,
+        "PluginPlannerROS/PathAlign/scale": 10.0,
+        "PluginPlannerROS/GoalAlign/scale": 10.0,
+        "PluginPlannerROS/PathDist/scale": 10.0,
+        "PluginPlannerROS/GoalDist/scale": 24.0,
+        "PluginPlannerROS/Obstacle/scale": 30.0
+    }
+
 
     def __init__(self, name):
         rospy.loginfo("Starting %s ..." % name)
         self.out_dir = rospy.get_param("~out_dir")
         self.par = str(rospy.get_param("~par"))
+
+        self.conditions = np.random.choice(['V','V','V','V','V','G','G','G','G','G'], size=10, replace=False)
+        print self.conditions
 
         self.client = SimpleActionClient("/camera_effects", CameraEffectsAction)
         self.client.wait_for_server()
@@ -200,7 +212,7 @@ class Test(object):
             rospy.sleep(0.01)
 
     def run(self):
-        rospy.loginfo("Starting run %s" % self.num_trial)
+        rospy.loginfo("Starting run %s in condition %s" % (self.num_trial,self.conditions[self.num_trial]))
         self.num_trial += 1
         self.trajectories.append([])
         self.stop_times.append([])
@@ -234,7 +246,14 @@ class Test(object):
                 queue_size=1
             )
 
-            self.scale_dyn.update_configuration(self.__velmaps_config)
+            if self.conditions[self.num_trial] == 'V':
+                self.prox_dyn.update_configuration({"enabled": False})
+                self.pass_dyn.update_configuration({"enabled": False})
+                self.scale_dyn.update_configuration(self.__velmaps_config)
+            else:
+                self.prox_dyn.update_configuration({"enabled": True})
+                self.pass_dyn.update_configuration({"enabled": True})
+                self.scale_dyn.update_configuration(self.__gaussian_config)
             s = rospy.ServiceProxy("/move_base/PluginPlannerROS/scale/set_parameters", Reconfigure)
             rospy.loginfo("  ... waiting for %s" % s.resolved_name)
             s.wait_for_service()
