@@ -155,6 +155,7 @@ class Test(object):
             rospy.loginfo("Starting run %s" % self.num_trial)
             self.num_trial += 1
             self.trajectories.append([])
+            self.crea_dyn.update_configuration({"decay_time":10.})
             rospy.loginfo("Creating services ...")
             try:
                 rospy.loginfo("Subscribing to human and robot pose")
@@ -200,6 +201,7 @@ class Test(object):
             except UnboundLocalError as e:
                 rospy.logwarn(e)
             self.ps = None; self.rs = None; self.qs = None; #gs = None
+            self.crea_dyn.update_configuration({"decay_time":.1})
 
             try:
                 r = rospy.ServiceProxy("/scenario_server/reset", Empty)
