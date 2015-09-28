@@ -186,7 +186,8 @@ class Test(object):
             ).reshape(-1, 6)
 
     def button_callback(self, msg):
-	print "Button pressed"
+        print "Button pressed"
+        self.stop_times.append([])
         self.b = msg.B
 
         if msg.A:
@@ -214,7 +215,7 @@ class Test(object):
     def run(self):
         rospy.loginfo("Starting run %s in condition %s" % (self.num_trial,self.conditions[self.num_trial]))
         self.trajectories.append([])
-        self.stop_times.append([])
+        self.stop_times = []
         self.crea_dyn.update_configuration({"decay_time":10.})
 
         rospy.loginfo("Creating services ...")
@@ -282,7 +283,11 @@ class Test(object):
             d["distance_travelled"] = result.distance_travelled
             d["travel_time"] = result.travel_time
             d["condition"] = self.conditions[self.num_trial]
-            d["stop_time"] = self.stop_times[-1][-1] - self.stop_times[-1][0] if self.stop_times[-1] else 0.
+            stop_times = []
+            for e in self.stop_times:
+                stop_times.append(e[-1] - e[0])
+            d["stop_time"] = stop_times
+            d["stop_num"] = len(self.stop_times)
             self.ret.append(d)
             self.write_file(None)
 
