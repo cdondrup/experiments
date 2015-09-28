@@ -25,6 +25,8 @@ from collections import OrderedDict
 import datetime
 from geometry_msgs.msg import Twist
 from threading import Thread
+from dynamic_reconfigure.srv import ReconfigureRequest, Reconfigure
+from dynamic_reconfigure.msg import DoubleParameter, Config
 
 
 PKG = "hri16_experiment"
@@ -203,6 +205,20 @@ class Test(object):
         self.trajectories.append([])
         self.stop_times.append([])
         self.crea_dyn.update_configuration({"decay_time":10.})
+
+        d = DoubleParameter()
+        c = Config()
+        for k,v in self.__velmaps_config.items():
+            c.doubles.append({k:v})
+        r = ReconfigureRequest()
+        r.config = c
+        s = rospy.ServiceProxy("/move_base/PluginPlannerROS/scale/set_parameters", Reconfigure)
+        rospy.loginfo("  ... waiting for %s" % s.resolved_name)
+        s.wait_for_service()
+        rospy.loginfo("  ... calling %s" % s.resolved_name)
+        s()
+        rospy.loginfo("  ... done")
+
         self.scale_dyn.update_configuration(self.__velmaps_config)
         rospy.loginfo("Creating services ...")
         try:
