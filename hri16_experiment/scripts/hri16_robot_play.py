@@ -213,7 +213,6 @@ class Test(object):
 
     def run(self):
         rospy.loginfo("Starting run %s in condition %s" % (self.num_trial,self.conditions[self.num_trial]))
-        self.num_trial += 1
         self.trajectories.append([])
         self.stop_times.append([])
         self.crea_dyn.update_configuration({"decay_time":10.})
@@ -247,10 +246,12 @@ class Test(object):
             )
 
             if self.conditions[self.num_trial] == 'V':
+                print "VELOCITY"
                 self.prox_dyn.update_configuration({"enabled": False})
                 self.pass_dyn.update_configuration({"enabled": False})
                 self.scale_dyn.update_configuration(self.__velmaps_config)
             else:
+                print "GAUSSIAN"
                 self.prox_dyn.update_configuration({"enabled": True})
                 self.pass_dyn.update_configuration({"enabled": True})
                 self.scale_dyn.update_configuration(self.__gaussian_config)
@@ -280,6 +281,7 @@ class Test(object):
             d["mean_speed"] = result.mean_speed
             d["distance_travelled"] = result.distance_travelled
             d["travel_time"] = result.travel_time
+            d["condition"] = self.conditions[self.num_trial]
             d["stop_time"] = self.stop_times[-1][-1] - self.stop_times[-1][0] if self.stop_times[-1] else 0.
             self.ret.append(d)
             self.write_file(None)
@@ -317,6 +319,7 @@ class Test(object):
                 rospy.loginfo("  ... done")
             except (rospy.ServiceException, rospy.ROSInterruptException) as e:
                 rospy.logfatal(e)
+        self.num_trial += 1
 
 
     def write_file(self, req):
