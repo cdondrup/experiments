@@ -41,6 +41,24 @@ class Test(object):
 
     __qtc_buffer = OrderedDict()
 
+    __defaul_config = {
+       "PluginPlannerROS/VelocityCostmaps/scale": 0.0,
+        "PluginPlannerROS/PathAlign/scale": 32.0,
+        "PluginPlannerROS/GoalAlign/scale": 24.0,
+        "PluginPlannerROS/PathDist/scale": 32.0,
+        "PluginPlannerROS/GoalDist/scale": 24.0,
+        "PluginPlannerROS/Obstacle/scale": 0.01
+    }
+
+    __velmaps_config = {
+        "PluginPlannerROS/VelocityCostmaps/scale": 30.0,
+        "PluginPlannerROS/PathAlign/scale": 10.0,
+        "PluginPlannerROS/GoalAlign/scale": 10.0,
+        "PluginPlannerROS/PathDist/scale": 10.0,
+        "PluginPlannerROS/GoalDist/scale": 24.0,
+        "PluginPlannerROS/Obstacle/scale": 0.01
+    }
+
 
     def __init__(self, name):
         rospy.loginfo("Starting %s ..." % name)
@@ -54,6 +72,8 @@ class Test(object):
         self.crea_dyn.update_configuration(self.__config_lookup[0])
 
         self.scale_dyn = DynClient("/move_base/PluginPlannerROS/scale")
+        self.prox_dyn = DynClient("/move_base/local_costmap/proxemic_layer")
+        self.pass_dyn = DynClient("/move_base/local_costmap/passing_layer")
 
         self.ppl_topic = rospy.get_param("~ppl_topic", "/people_tracker/positions")
         self.robot_topic = rospy.get_param("~robot_topic", "/robot_pose")
@@ -183,7 +203,7 @@ class Test(object):
         self.trajectories.append([])
         self.stop_times.append([])
         self.crea_dyn.update_configuration({"decay_time":10.})
-        self.scale_dyn.update_configuration({"PluginPlannerROS/VelocityCostmaps/scale": 30.0})
+        self.scale_dyn.update_configuration(self.__velmaps_config)
         rospy.loginfo("Creating services ...")
         try:
             rospy.loginfo("Subscribing to human and robot pose")
@@ -250,7 +270,9 @@ class Test(object):
             self.ps = None; self.rs = None; self.qs = None; self.gs = None
 
             self.crea_dyn.update_configuration({"decay_time":.1})
-            self.scale_dyn.update_configuration({"PluginPlannerROS/VelocityCostmaps/scale": 0.0})
+            self.scale_dyn.update_configuration(self.__defaul_config)
+            self.prox_dyn.update_configuration({"enabled": False})
+            self.pass_dyn.update_configuration({"enabled": False})
 
             try:
                 r = rospy.ServiceProxy("/scenario_server/reset", Empty)
