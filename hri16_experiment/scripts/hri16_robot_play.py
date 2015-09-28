@@ -43,7 +43,7 @@ class Test(object):
 
     __qtc_buffer = OrderedDict()
 
-    __defaul_config = {
+    __default_config = {
        "PluginPlannerROS/VelocityCostmaps/scale": 0.0,
         "PluginPlannerROS/PathAlign/scale": 32.0,
         "PluginPlannerROS/GoalAlign/scale": 24.0,
@@ -206,20 +206,6 @@ class Test(object):
         self.stop_times.append([])
         self.crea_dyn.update_configuration({"decay_time":10.})
 
-        d = DoubleParameter()
-        c = Config()
-        for k,v in self.__velmaps_config.items():
-            c.doubles.append({k:v})
-        r = ReconfigureRequest()
-        r.config = c
-        s = rospy.ServiceProxy("/move_base/PluginPlannerROS/scale/set_parameters", Reconfigure)
-        rospy.loginfo("  ... waiting for %s" % s.resolved_name)
-        s.wait_for_service()
-        rospy.loginfo("  ... calling %s" % s.resolved_name)
-        s()
-        rospy.loginfo("  ... done")
-
-        self.scale_dyn.update_configuration(self.__velmaps_config)
         rospy.loginfo("Creating services ...")
         try:
             rospy.loginfo("Subscribing to human and robot pose")
@@ -248,6 +234,13 @@ class Test(object):
                 queue_size=1
             )
 
+            self.scale_dyn.update_configuration(self.__velmaps_config)
+            s = rospy.ServiceProxy("/move_base/PluginPlannerROS/scale/set_parameters", Reconfigure)
+            rospy.loginfo("  ... waiting for %s" % s.resolved_name)
+            s.wait_for_service()
+            rospy.loginfo("  ... calling %s" % s.resolved_name)
+            s()
+            rospy.loginfo("  ... done")
             s = rospy.ServiceProxy("/qtc_state_predictor/particle_filter/reset", Empty)
             rospy.loginfo("  ... waiting for %s" % s.resolved_name)
             s.wait_for_service()
@@ -286,11 +279,17 @@ class Test(object):
             self.ps = None; self.rs = None; self.qs = None; self.gs = None
 
             self.crea_dyn.update_configuration({"decay_time":.1})
-            self.scale_dyn.update_configuration(self.__defaul_config)
             self.prox_dyn.update_configuration({"enabled": False})
             self.pass_dyn.update_configuration({"enabled": False})
 
             try:
+                self.scale_dyn.update_configuration(self.__default_config)
+                s = rospy.ServiceProxy("/move_base/PluginPlannerROS/scale/set_parameters", Reconfigure)
+                rospy.loginfo("  ... waiting for %s" % s.resolved_name)
+                s.wait_for_service()
+                rospy.loginfo("  ... calling %s" % s.resolved_name)
+                s()
+                rospy.loginfo("  ... done")
                 r = rospy.ServiceProxy("/scenario_server/reset", Empty)
                 rospy.loginfo("  ... waiting for %s" % r.resolved_name)
                 r.wait_for_service()
