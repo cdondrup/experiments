@@ -53,6 +53,8 @@ class Test(object):
         self.crea_dyn = DynClient("online_qtc_creator")
         self.crea_dyn.update_configuration(self.__config_lookup[0])
 
+        self.scale_dyn = DynClient("/move_base/PluginPlannerROS/scale")
+
         self.ppl_topic = rospy.get_param("~ppl_topic", "/people_tracker/positions")
         self.robot_topic = rospy.get_param("~robot_topic", "/robot_pose")
         self.qtc_topic = rospy.get_param("~qtc_topic", "/online_qtc_creator/qtc_array")
@@ -180,6 +182,8 @@ class Test(object):
         self.num_trial += 1
         self.trajectories.append([])
         self.stop_times.append([])
+        self.crea_dyn.update_configuration({"decay_time":10.})
+        self.scale_dyn.update_configuration({"PluginPlannerROS/VelocityCostmaps/scale": 30.0})
         rospy.loginfo("Creating services ...")
         try:
             rospy.loginfo("Subscribing to human and robot pose")
@@ -218,7 +222,7 @@ class Test(object):
             rospy.loginfo("  ... waiting for %s" % s.resolved_name)
             s.wait_for_service()
             rospy.loginfo("  ... calling %s" % s.resolved_name)
-            self.client.send_goal(CameraEffectsGoal())
+            self.client.send_goal_and_wait(CameraEffectsGoal())
             result = s()
             rospy.loginfo("  ... done")
             d = {}
@@ -244,6 +248,9 @@ class Test(object):
             except UnboundLocalError as e:
                 rospy.logwarn(e)
             self.ps = None; self.rs = None; self.qs = None; self.gs = None
+
+            self.crea_dyn.update_configuration({"decay_time":.1})
+            self.scale_dyn.update_configuration({"PluginPlannerROS/VelocityCostmaps/scale": 0.0})
 
             try:
                 r = rospy.ServiceProxy("/scenario_server/reset", Empty)
