@@ -73,6 +73,7 @@ class Test(object):
         self.scenario = "record_robot"
 
         self.trajectories = []
+        self.traj_name = []
         self.ret = []
 
         rospy.loginfo("... loading scenario")
@@ -112,6 +113,7 @@ class Test(object):
             "y3": self.goal_pose.pose.position.y
         }
         self.trajectories[-1].append(msgs)
+        if not msg.uuids[0] in self.traj_name: self.traj_name.append(msg.uuids[0])
 
 
     def pose_callback(self, msg):
@@ -222,7 +224,7 @@ class Test(object):
             rospy.logwarn(e)
 
         for i, t in enumerate(trajectories):
-            name = "p"+self.par+"_"+str(i)+".csv"
+            name = "p"+self.par+"_"+str(i)+"_"+self.traj_name[i]+".csv"
             with open(mydir+"/"+name, 'w') as f:
                 rospy.loginfo("Writing %s" % name)
                 try:
@@ -232,8 +234,8 @@ class Test(object):
                 except Exception as e:
                     rospy.logwarn(e)
 
-        for i, v in enumerate(self.__qtc_buffer.values()):
-            name = "p"+self.par+"_"+str(i)+"_qtc.txt"
+        for i, (k,v) in enumerate(self.__qtc_buffer.items()):
+            name = "p"+self.par+"_"+str(i)+"_"+k+"_qtc.txt"
             with open(mydir+"/"+name, 'w') as f:
                 rospy.loginfo("Writing %s" % name)
                 try:

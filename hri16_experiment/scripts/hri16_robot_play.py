@@ -72,7 +72,10 @@ class Test(object):
         self.ret = []
         self.stop_times = []
 
+        self.b = False
         self.action_thread = None
+        self.stop_thread = Thread(target=self.stop)
+        self.stop_thread.start()
 
         rospy.loginfo("... loading scenario")
         try:
@@ -147,19 +150,32 @@ class Test(object):
             ).reshape(-1, 6)
 
     def button_callback(self, msg):
-        if msg.B:
-            self.stop_times[-1].append(rospy.Time.now().to_sec())
-            t = Twist()
-            t.linear.x = 0
-            t.angular.z = 0
-            self.pub.publish(t)
-            print self.stop_times[-1]
-        elif msg.A:
-            if not self.action_thread == None:
-                if not self.action_thread.is_alive():
-                    self.action_thread = Thread(target=self.run)
+	print "Button pressed"
+        self.b = msg.B
 
-    def run(self, msg):
+        if msg.A:
+            if self.action_thread == None:
+                self.action_thread = Thread(target=self.run)
+                self.action_thread.start()
+                return
+            if not self.action_thread.is_alive():
+                self.action_thread = Thread(target=self.run)
+                self.action_thread.start()
+
+    def stop(self):
+        while not rospy.is_shutdown():
+            if self.b:
+                if not self.stop_times[-1]:
+                    self.stop_times[-1].extend([rospy.Time.now().to_sec(), 0])
+                self.stop_times[-1][-1] = rospy.Time.now().to_sec()
+                t = Twist()
+                t.linear.x = 0
+                t.angular.z = 0
+                self.pub.publish(t)
+                #print self.stop_times[-1]
+            rospy.sleep(0.01)
+
+    def run(self):
         rospy.loginfo("Starting run %s" % self.num_trial)
         self.num_trial += 1
         self.trajectories.append([])
